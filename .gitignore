@@ -1,0 +1,4 @@
+admin-panel/
+.venv
+.backend/.env
+.backend.env.example

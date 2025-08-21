@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5054:5054"
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./backend/.env
+    # The backend can reach the frontend via 'frontend' hostname on the Docker network
+    # Outbound SMTP (e.g., to smtp.gmail.com:465 or 587) is allowed by default unless your host firewall blocks it
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:5054/api/v1
+    # The frontend can reach the backend via 'backend' hostname on the Docker network
+    # No SMTP needed for frontend
+networks:
+  default:
+    driver: bridge
+    # All services share this network, so they can communicate using service names as hostnames

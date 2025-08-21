@@ -1,0 +1,479 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing: border-box;
+}
+.handleCaptcha{
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+
+}
+.Main{
+  width:100vw;
+  min-height:180vh;
+  max-height: auto;
+  background: linear-gradient(to top right, #9E4084, #0E0A0B, #291440, #374E9C);
+  display:flex;
+  flex-direction:column;
+  align-items: center;
+  padding:30px;
+
+}
+.logo{
+ 
+  width:200px;
+  margin-bottom:40px;
+  z-index: 10;
+  
+}
+.top-right {
+    position: absolute;
+    top: 12%;
+    right: 2%;
+    width: 134px;
+    z-index: 1;
+}
+.bottom-right {
+    position: absolute;
+    bottom: -50%;
+    right: 0%;
+    z-index: 1;
+    width: 150px;
+}
+.top-left {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    z-index: 1;
+    width: 110px;
+}
+.top-left-ball{
+   position: absolute;
+  top: 16%;
+  left: 1%;
+  z-index: 1;
+  width: 140px;
+}
+.top-left-ball2 {
+    position: absolute;
+    top: 0%;
+    left: 80px;
+    z-index: 1;
+    width: 140px;
+}
+.bottom-left{
+   position: absolute;
+  top:100%;
+  left: 0%;
+  z-index: 1;
+  width: 170px;
+}
+.bottom-left-ball {
+    position: absolute;
+    top:103%;
+    left: 84px;
+    z-index: 1;
+    width: 106px;
+}
+.bottom-left-ball2 {
+    position: absolute;
+    top:101%;
+    left: 0%;
+    z-index: 1;
+    width: 153px;
+}
+h1{
+font-family: "League Spartan", sans-serif;
+font-weight: 600;
+font-size: 45px;
+text-align: center;
+vertical-align: middle;
+ background: linear-gradient(#FFFFFF, #252525); 
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+margin-bottom:40px;
+  z-index: 100;
+
+
+}
+
+/* Input css */
+
+ .inputcontainer{
+  
+    max-height: auto;
+    width: 500px;
+    color: aliceblue;
+    padding: 50px;
+    background-color:#0E000C;
+  border: 3px solid rgba(128, 128, 128,0.5);
+  border-radius: 12px;
+  
+  z-index: 1000;
+  
+  
+  }
+  .input{
+    margin-top: 35px;
+    font-family: "League Spartan", sans-serif;
+    font-weight: 600;
+    height: 72px;
+    width:100%;
+  }
+  input,select{
+    color: aliceblue;
+    width: 100%;
+  height: 40.8px;
+  border: 0.93px solid grey;
+  border-radius: 6.14px;
+  background-color: rgba(255, 255, 255, 0.059);
+  }
+  .verifybtn{
+    color: aliceblue;
+    line-height: 21px;
+    font-size: 21px;
+    width: 100%;
+    height: 53px;
+    border: 0.93px solid grey;
+    border-radius: 6.14px;
+    background: linear-gradient(to bottom left,#0E0A0B,#291440,#9E4084);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1001;
+    position: relative;
+  }
+  
+  .verifybtn:hover:not(:disabled) {
+    background: linear-gradient(to bottom left,#291440,#9E4084,#0E0A0B);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(158, 64, 132, 0.3);
+  }
+  
+  .verifybtn:disabled {
+    background: linear-gradient(to bottom left,#666,#444,#222);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .verifybtn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  .input1{
+    margin-top: 35px;
+    width:100%;
+    height: 72px;
+    display: flex;
+    justify-content: space-between;
+  }
+  label{
+    top: 0px;
+    display: block;
+    height: 30px;
+  }
+  .gender {
+    width:50%;
+    margin-right:20px;
+   
+  }
+  .scholar{
+    width:50%;
+  }
+  option{
+    color: black;
+  }
+  .name{
+    font-family: "League Spartan", sans-serif;
+    font-weight: 600;
+    height: 72px;
+    width: 100%;
+  }
+
+
+  /* verification css */
+
+   
+  .verification{
+    padding: 10px;
+    border: 3px solid rgba(128, 128, 128,0.5);
+  border-radius: 12px;
+    top: 15rem;
+    left: 42rem;
+   display: flex;
+   flex-direction: column;
+   justify-content: space-around;
+   align-items: center;
+    width: 500px;
+    min-height: 600px;
+    max-height: auto;
+    background-color: rgb(8, 6, 28);
+  z-index: 1000;
+ 
+  }
+  .verihead{
+    color: aliceblue;
+    font-family: "League Spartan", sans-serif;
+    font-weight: 600;
+    text-align: center;
+    font-size: 40px;
+    margin-top: 5%;
+    letter-spacing: 1%;
+  }
+  .para{
+    color: rgb(255, 255, 255);
+    width: 90%;
+    height: 64px;
+    margin-top: 8%;
+    opacity: 60%;
+    font-family: "League Spartan", sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  text-align: center;
+  }
+  .para span{
+    text-decoration: underline;
+  }
+  .otp{
+    height: 78.1px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15%;
+  }
+  .no{
+    background-color:rgba(255, 255, 255, 0.02) ;
+    width: 15%;
+    height: 80%;
+    border: 1.1px solid rgba(255, 255, 255, 0.302);
+    border-radius: 7.28px;
+    text-align: center;
+    font-size: 24px;
+  }
+  .error {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+  
+  .submitbtn{
+    margin-top:10%;
+    width: 90%;
+    height: 53px;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-family: "League Spartan", sans-serif;
+    background: linear-gradient(to bottom left,#0E0A0B,#291440,#9E4084);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1001;
+    position: relative;
+    border: none;
+  }
+  
+  .submitbtn:hover:not(:disabled) {
+    background: linear-gradient(to bottom left,#291440,#9E4084,#0E0A0B);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(158, 64, 132, 0.3);
+  }
+  
+  .submitbtn:disabled {
+    background: linear-gradient(to bottom left,#666,#444,#222);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .submitbtn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  .resend{
+    color: aliceblue;
+    padding: 5%;
+    font-weight: 500;
+    font-size: 20px;
+    text-decoration:underline;
+  }
+  @media screen and (max-width:700px) {
+    .top-right {
+        position: absolute;
+        top: 6%;
+        right: 2%;
+        width: 100px;
+        z-index: 1;
+    }
+    .bottom-right {
+        position: absolute;
+        bottom:-50%;
+        right: 0%;
+        z-index: 1;
+        width: 100px;
+    }
+.top-left {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    z-index: 1;
+    width: 75px;
+}
+.top-left-ball {
+    position: absolute;
+    top: 11%;
+    left: 1%;
+    z-index: 1;
+    width: 90px;
+}
+.top-left-ball2 {
+    position: absolute;
+    top: 0%;
+    left: 54px;
+    z-index: 1;
+    width: 100px;
+}
+.bottom-left {
+        position: absolute;
+        top:100%;
+        left: 0%;
+        z-index: 1;
+        width: 110px;
+    }
+.bottom-left-ball {
+        position: absolute;
+        top: 103%;
+        left: 35px;
+        z-index: 1;
+        width: 65px;
+    }
+.bottom-left-ball2 {
+        position: absolute;
+        top:101%;
+        left: 0%;
+        z-index: 1;
+        width: 83px;
+    }
+.inputcontainer{
+    width: 80%;
+}
+.verification{
+    width: 90%;
+  }
+  }
+  @media screen and (max-width:500px){
+    .query{
+      font-size:2px;
+    }
+  }
+ @media screen and (max-width:450px) {
+  .top-right {
+        position: absolute;
+        top: 6%;
+        right: 2%;
+        width: 100px;
+        z-index: 1;
+    }
+.bottom-right {
+        position: absolute;
+        bottom:-50%;
+        right: 0%;
+        z-index: 1;
+        width: 100px;
+    }
+.top-left {
+        position: absolute;
+        top: 0%;
+        left: 0%;
+        z-index: 1;
+        width: 54px;
+    }
+.top-left-ball {
+        position: absolute;
+        top: 8%;
+        left: 1%;
+        z-index: 1;
+        width: 64px;
+    }
+.top-left-ball2 {
+        position: absolute;
+        top: 0%;
+        left: 44px;
+        z-index: 1;
+        width: 57px;
+    }
+.bottom-left {
+        position: absolute;
+        top:100%;
+        left: 0%;
+        z-index: 1;
+        width: 110px;
+    }
+.bottom-left-ball {
+        position: absolute;
+        top:103%;
+        left: 35px;
+        z-index: 1;
+        width: 65px;
+    }
+.bottom-left-ball2 {
+        position: absolute;
+        top:101%;
+        left: 0%;
+        z-index: 1;
+        width: 83px;
+    }
+.verification{
+    width: 90%;
+    min-height: 400px;
+  }
+  .inputcontainer{
+    width: 90%;
+    padding: 20px;
+}
+  h1{
+    font-size: 35px;
+  }
+.verihead{
+  font-size: 30px;
+}
+.para{
+   font-size: 19px;
+}
+.no{
+  height: 50%;
+}
+.resend{
+  font-size: 15px;
+}
+  }
+
+  @media screen and (max-width:360px) {
+    .bottom-right {
+        position: absolute;
+        bottom:-50%;
+        right: 0%;
+        z-index: 1;
+        width: 100px;
+    }
+.verification{
+    width: 95%;
+    min-height: 380px;
+  }
+  .inputcontainer{
+    width: 95%;
+    padding: 20px;
+}
+    h1{
+    font-size: 26px;
+  }
+.verihead{
+  font-size: 23px;
+}
+.para{
+   font-size: 15px;
+}
+.no{
+  height: 50%;
+}
+.resend{
+  font-size: 15px;
+}
+  }
