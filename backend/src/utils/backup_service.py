@@ -41,9 +41,55 @@ class BackupService:
 
     async def create_csv_backup(self) -> bool:
         """Create CSV backup of all verified students"""
-        try:
-            print(f"💾 Starting database backup...")
+        return await self._sync_backup()
 
+    def _backup_loop(self):
+        """Background loop for scheduled backups"""
+        while True:
+            try:
+                print(f"💾 Starting database backup...")
+
+                # Use threading event to control timing
+                event = threading.Event()
+                success = False
+
+                # Create a simple sync wrapper for the async backup
+                def run_backup():
+                    nonlocal success
+                    try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        success = loop.run_until_complete(self._sync_backup())
+                        loop.close()
+                    except Exception as e:
+                        print(f"❌ Backup error: {e}")
+                        success = False
+
+                # Run backup in a separate thread to avoid loop conflicts
+                backup_thread = threading.Thread(target=run_backup)
+                backup_thread.start()
+                backup_thread.join(timeout=60)  # 60 second timeout
+
+                if success:
+                    print(
+                        f"🔄 Next backup scheduled in {self.backup_interval_hours} hours"
+                    )
+                    wait_seconds = self.backup_interval_hours * 3600
+                else:
+                    print(f"⚠️ Backup failed, retrying in 30 minutes")
+                    wait_seconds = 1800  # 30 minutes
+
+                # Wait for next backup
+                event.wait(wait_seconds)
+
+            except Exception as e:
+                print(f"❌ Error in backup scheduler: {e}")
+                # Wait 5 minutes on error
+                threading.Event().wait(300)
+
+    async def _sync_backup(self) -> bool:
+        """Sync version of backup to avoid loop conflicts"""
+        try:
             # Get all verified students
             students = await StudentDatabase.get_all_verified_students()
 
@@ -51,18 +97,16 @@ class BackupService:
                 print("ℹ️ No verified students to backup")
                 return True
 
-            # Define CSV headers
+            # Define CSV headers - updated for current schema
             headers = [
                 "id",
                 "fullName",
                 "studentEmail",
+                "studentNumber",
                 "rollNumber",
                 "branch",
-                "semester",
-                "graduationYear",
                 "gender",
                 "scholar",
-                "studentNumber",
                 "mobileNumber",
                 "domain",
                 "isVerified",
@@ -109,55 +153,22 @@ class BackupService:
             print(f"❌ Backup failed: {e}")
             return False
 
-    def _backup_loop(self):
-        """Background loop for scheduled backups"""
-        while True:
-            try:
-                # Create new event loop for this thread
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-
-                try:
-                    # Run backup
-                    success = loop.run_until_complete(self.create_csv_backup())
-
-                    if success:
-                        print(
-                            f"🔄 Next backup scheduled in {self.backup_interval_hours} hours"
-                        )
-                    else:
-                        print(f"⚠️ Backup failed, retrying in 30 minutes")
-                        # Wait 30 minutes on failure, then try again
-                        threading.Event().wait(1800)
-                        continue
-
-                    # Wait for next backup interval (2 hours = 7200 seconds)
-                    wait_seconds = self.backup_interval_hours * 3600
-                    threading.Event().wait(wait_seconds)
-
-                finally:
-                    loop.close()
-
-            except Exception as e:
-                print(f"❌ Error in backup scheduler: {e}")
-                # Wait 5 minutes on error
-                threading.Event().wait(300)
-
     def _start_backup_scheduler(self):
         """Start the background backup scheduler"""
         backup_thread = threading.Thread(target=self._backup_loop, daemon=True)
         backup_thread.start()
         print(f"⏰ Backup scheduler started (every {self.backup_interval_hours} hours)")
 
-        # Run initial backup after 5 minutes
+        # Run initial backup after 5 minutes - simplified to avoid loop conflicts
         def initial_backup():
             threading.Event().wait(300)  # Wait 5 minutes
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
             try:
-                loop.run_until_complete(self.create_csv_backup())
-            finally:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(self._sync_backup())
                 loop.close()
+            except Exception as e:
+                print(f"❌ Initial backup failed: {e}")
 
         initial_thread = threading.Thread(target=initial_backup, daemon=True)
         initial_thread.start()
@@ -196,7 +207,7 @@ class BackupService:
     async def force_backup(self) -> bool:
         """Force an immediate backup"""
         print("🔧 Manual backup initiated...")
-        return await self.create_csv_backup()
+        return await self._sync_backup()
 
 
 # Global backup service instance

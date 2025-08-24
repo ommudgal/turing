@@ -8,11 +8,62 @@ class StudentDatabase:
     """Database operations for students (only verified students)"""
 
     @staticmethod
+    async def check_duplicate_fields(student_data: Dict[str, Any]) -> Dict[str, bool]:
+        """Check for duplicate student number, university roll number, and email"""
+        try:
+            database = await get_database()
+            students_collection = database.students
+
+            # Check for duplicates in critical fields
+            duplicates = {
+                "studentNumber": False,
+                "rollNumber": False,
+                "studentEmail": False,
+            }
+
+            # Check student number
+            student_number_exists = await students_collection.find_one(
+                {"studentNumber": student_data.get("studentNumber"), "isVerified": True}
+            )
+            if student_number_exists:
+                duplicates["studentNumber"] = True
+
+            # Check university roll number
+            roll_number_exists = await students_collection.find_one(
+                {"rollNumber": student_data.get("rollNumber"), "isVerified": True}
+            )
+            if roll_number_exists:
+                duplicates["rollNumber"] = True
+
+            # Check email
+            email_exists = await students_collection.find_one(
+                {"studentEmail": student_data.get("studentEmail"), "isVerified": True}
+            )
+            if email_exists:
+                duplicates["studentEmail"] = True
+
+            return duplicates
+
+        except Exception as e:
+            print(f"❌ Error checking duplicates: {e}")
+            raise
+
+    @staticmethod
     async def create_verified_student(student_data: Dict[str, Any]) -> str:
         """Create a new VERIFIED student in database"""
         try:
             database = await get_database()
             students_collection = database.students
+
+            # Check for duplicates before inserting
+            duplicates = await StudentDatabase.check_duplicate_fields(student_data)
+            if any(duplicates.values()):
+                duplicate_fields = [
+                    field for field, is_duplicate in duplicates.items() if is_duplicate
+                ]
+                raise Exception(
+                    f"Duplicate entries found for: {', '.join(duplicate_fields)}"
+                )
 
             # Add metadata - only verified students are stored
             student_data["id"] = str(uuid.uuid4())

@@ -23,7 +23,7 @@ services:
     depends_on:
       - backend
     environment:
-      - REACT_APP_API_URL=https://mlcoe.live/api/v1
+      - REACT_APP_API_URL=https://register.mlcoe.tech/api/v1
       
     # The frontend can reach the backend via 'backend' hostname on the Docker network
     # No SMTP needed for frontend

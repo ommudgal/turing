@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://mlcoe.live/api/v1';
+const API_URL = process.env.REACT_APP_API_URL || 'https://register.mlcoe.tech/api/v1';
 
 const Input = ({handleevent}) => {
   const [errors, setErrors] = useState({});

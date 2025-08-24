@@ -18,6 +18,7 @@ from ..utils.email import (
     get_memory_stats,
 )
 from ..utils.captcha import verify_recaptcha
+from ..database.operations import StudentDatabase
 
 email_service = EmailService()
 
@@ -30,18 +31,28 @@ class StudentController:
             print(f"🔍 Registration Debug:")
             print(f"   Received data: {student_data.dict()}")
 
-            # Check if student is already verified in database
-            existing_verified_student = await get_verified_student_by_email(
-                student_data.studentEmail
+            # Check for duplicate fields (student number, roll number, email)
+            duplicates = await StudentDatabase.check_duplicate_fields(
+                student_data.dict()
             )
-            if existing_verified_student:
-                print(
-                    f"❌ Student already verified and registered: {student_data.studentEmail}"
+
+            duplicate_messages = []
+            if duplicates["studentNumber"]:
+                duplicate_messages.append("Student number is already registered")
+            if duplicates["rollNumber"]:
+                duplicate_messages.append(
+                    "University roll number is already registered"
                 )
-                raise HTTPException(
-                    status_code=400,
-                    detail="Student is already registered and verified. Please contact support if you need assistance.",
+            if duplicates["studentEmail"]:
+                duplicate_messages.append("College email is already registered")
+
+            if duplicate_messages:
+                error_message = (
+                    ". ".join(duplicate_messages)
+                    + ". Please contact support if you need assistance."
                 )
+                print(f"❌ Duplicate entries found: {error_message}")
+                raise HTTPException(status_code=400, detail=error_message)
 
             # Check if there's a pending registration
             pending_registration = await get_pending_registration(

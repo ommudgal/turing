@@ -20,9 +20,10 @@ limiter = Limiter(key_func=get_remote_address, storage_uri="redis://redis:6379")
 async def lifespan(app: FastAPI):
     # Startup
     await connect_to_mongo()
-    # Start backup service after successful MongoDB connection
-    backup_service.start_scheduler()
-    print("🚀 Backup service initialized and scheduled")
+    # Temporarily disable backup service to avoid asyncio loop conflicts
+    # backup_service.start_scheduler()
+    # print("🚀 Backup service initialized and scheduled")
+    print("🚀 Application started successfully")
     yield
     # Shutdown
     await close_mongo_connection()
@@ -39,7 +40,13 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://frontend:80"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://frontend:80",
+        "https://register.mlcoe.tech",
+        "https://mlcoe.tech",
+        "https://mlcoe.live",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

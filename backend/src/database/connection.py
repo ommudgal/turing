@@ -56,9 +56,22 @@ async def connect_to_mongo():
         database = db.client.trained_tuned_2025
         students_collection = database.students
 
-        # Create unique index on email
+        # Create unique indexes on critical fields
         await students_collection.create_index("studentEmail", unique=True)
+        await students_collection.create_index("studentNumber", unique=True)
+        await students_collection.create_index("rollNumber", unique=True)
         print("✅ Database indexes created successfully!")
+
+        # Create compound index for efficient duplicate checking
+        await students_collection.create_index(
+            [
+                ("studentEmail", 1),
+                ("studentNumber", 1),
+                ("rollNumber", 1),
+                ("isVerified", 1),
+            ]
+        )
+        print("✅ Compound index for duplicate checking created!")
 
     except Exception as e:
         print(f"❌ MongoDB connection failed: {e}")

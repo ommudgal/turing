@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://mlcoe.live/api/v1';
+const API_URL = process.env.REACT_APP_API_URL || 'https://register.mlcoe.tech/api/v1';
 
 const Verification = ({useremail}) => {
   const [otp, setOtp] = useState(Array(5).fill("")); // Changed from 4 to 5 for new format
@@ -45,6 +45,29 @@ const Verification = ({useremail}) => {
             nextInput.focus();
           }
         }
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    // Handle backspace key
+    if (e.key === 'Backspace') {
+      const newOtp = [...otp];
+      
+      // If current field has content, clear it
+      if (newOtp[index]) {
+        newOtp[index] = '';
+        setOtp(newOtp);
+      } 
+      // If current field is empty and we're not at the first position, move to previous field
+      else if (index > 0) {
+        const prevInput = document.getElementById(`otp-input-${index - 1}`);
+        if (prevInput) {
+          prevInput.focus();
+          // Clear the previous field as well
+          newOtp[index - 1] = '';
+          setOtp(newOtp);
+        }
+      }
     }
   };
 
@@ -145,6 +168,7 @@ const Verification = ({useremail}) => {
             maxLength="1"
             value={digit}
             onChange={(e) => handleChange(e.target.value, index)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
             onFocus={(e) => e.target.select()}
           />
         ))}
