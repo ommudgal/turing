@@ -60,6 +60,26 @@ const Input = ({handleevent}) => {
       }
     }
 
+    // Mobile number validation - must be exactly 10 digits
+    if (field === "mobile") {
+      if (value.length > 0 && !/^[0-9]*$/.test(value)) {
+        setErrors((prev) => ({ ...prev, mobile: "Mobile number must contain only digits" }));
+        return;
+      }
+      if (value.length > 0 && value.length !== 10) {
+        setErrors((prev) => ({ ...prev, mobile: "Mobile number must be exactly 10 digits" }));
+        return;
+      }
+      if (value.length === 10 && /^[0-9]{10}$/.test(value)) {
+        // Valid 10-digit number, clear error
+        setErrors((prev) => {
+          const { mobile: _, ...rest } = prev;
+          return rest;
+        });
+        return;
+      }
+    }
+
     // Basic pattern validation for complete input
     if (pattern && value.length > 0 && !pattern.test(value)) {
       if (field === "studentNumber") {
@@ -120,6 +140,13 @@ const Input = ({handleevent}) => {
       !studentNumber || !email || !mobile || !domain
     ) {
       toast.error("Please fill all the required fields.");
+      return;
+    }
+
+    // Specific validation for mobile number - must be exactly 10 digits
+    if (mobile.length !== 10 || !/^[0-9]{10}$/.test(mobile)) {
+      toast.error("Mobile number must be exactly 10 digits.");
+      setErrors((prev) => ({ ...prev, mobile: "Mobile number must be exactly 10 digits" }));
       return;
     }
 
@@ -384,7 +411,11 @@ const Input = ({handleevent}) => {
             type="tel"
             name="mobile"
             value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
+            maxLength="10"
+            onChange={(e) => {
+              setMobile(e.target.value);
+              validateField("mobile", e.target.value);
+            }}
             onBlur={(e) => validateField("mobile", e.target.value)}
             required
           />
@@ -434,7 +465,7 @@ const Input = ({handleevent}) => {
           className="verifybtn input"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Submitting..." : "Verify"}
+          {isSubmitting ? "Submitting..." : "Register"}
         </button>
       </form>
       

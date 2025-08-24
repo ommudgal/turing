@@ -34,24 +34,24 @@ class EmailService:
             message = MIMEMultipart()
             message["From"] = self.from_email
             message["To"] = to_email
-            message["Subject"] = "✅ Registration Confirmed - Trained & Tuned'25"
+            message["Subject"] = "✅ Registration Confirmed - The Turing Test 25"
 
             body = f"""
             <html>
             <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
                 <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; color: white;'>
-                    <h1 style='margin: 0; font-size: 28px;'>🎓 Trained & Tuned'25</h1>
+                    <h1 style='margin: 0; font-size: 28px;'>🎓 The Turing Test 25</h1>
                     <p style='margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;'>Student Registration Portal</p>
                 </div>
                 <div style='background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 20px 0;'>
                     <h2 style='color: #333; margin-top: 0;'>Registration Confirmed!</h2>
                     <p style='color: #555; font-size: 16px; line-height: 1.6;'>
-                        Congratulations! Your email has been successfully verified and your registration for Trained & Tuned'25 is now complete.<br><br>
+                        Congratulations! Your email has been successfully verified and your registration for The Turing Test 25 is now complete.<br><br>
                         We look forward to seeing you at the event!
                     </p>
                 </div>
                 <div style='text-align: center; padding: 20px; color: #666; font-size: 12px;'>
-                    <p style='margin: 0;'>© 2025 Trained & Tuned'25 Event | Student Registration System</p>
+                    <p style='margin: 0;'>© 2025 The Turing Test 25 Event | Student Registration System</p>
                     <p style='margin: 5px 0 0 0;'>This is an automated message, please do not reply.</p>
                 </div>
             </body>
@@ -97,20 +97,20 @@ class EmailService:
             message = MIMEMultipart()
             message["From"] = self.from_email
             message["To"] = to_email
-            message["Subject"] = "🔐 Verification Code - Trained & Tuned'25"
+            message["Subject"] = "🔐 Verification Code - The Turing Test 25"
 
             body = f"""
             <html>
             <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; color: white;">
-                    <h1 style="margin: 0; font-size: 28px;">🎓 Trained & Tuned'25</h1>
+                    <h1 style="margin: 0; font-size: 28px;">🎓 The Turing Test 25</h1>
                     <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Student Registration Portal</p>
                 </div>
                 
                 <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 20px 0;">
                     <h2 style="color: #333; margin-top: 0;">Welcome! Almost there...</h2>
                     <p style="color: #555; font-size: 16px; line-height: 1.6;">
-                        Thank you for registering for Trained & Tuned'25! To complete your registration, 
+                        Thank you for registering for The Turing Test 25! To complete your registration, 
                         please verify your email address using the code below:
                     </p>
                     
@@ -128,7 +128,7 @@ class EmailService:
                 </div>
                 
                 <div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">
-                    <p style="margin: 0;">© 2025 Trained & Tuned'25 Event | Student Registration System</p>
+                    <p style="margin: 0;">© 2025 The Turing Test 25 Event | Student Registration System</p>
                     <p style="margin: 5px 0 0 0;">This is an automated message, please do not reply.</p>
                 </div>
             </body>

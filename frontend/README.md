@@ -1,7 +1,7 @@
 
-# 🧠 GenAI Society Recruitment Registration Page
+# 🧠 The Turing Test 25 Registration Page
 
-A sleek and responsive **frontend-only registration page** designed for the **GenAI technical society recruitment**. Built with modern UI principles to deliver a smooth and engaging user experience for student applicants.
+A sleek and responsive **frontend registration page** designed for **The Turing Test 25 event**. Built with modern UI principles to deliver a smooth and engaging user experience for student applicants.
 
 ---
 

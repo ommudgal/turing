@@ -27,6 +27,11 @@ services:
       
     # The frontend can reach the backend via 'backend' hostname on the Docker network
     # No SMTP needed for frontend
+  landing:
+    build: ./landing
+    ports:
+      - "3001:80"
+    # Simple static landing page for mlcoe.tech
   redis:
     image: redis:alpine
     ports:
@@ -47,6 +52,7 @@ services:
     depends_on:
       - frontend
       - backend
+      - landing
 networks:
   default:
     driver: bridge

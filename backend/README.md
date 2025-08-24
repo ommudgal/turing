@@ -1,6 +1,6 @@
-# Backend API for Trained & Tuned'25
+# Backend API for The Turing Test 25
 
-This is the FastAPI backend for the Trained & Tuned'25 student registration system.
+This is the FastAPI backend for The Turing Test 25 student registration system.
 
 ## Features
 
