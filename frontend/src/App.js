@@ -50,7 +50,9 @@ function App() {
       </Routes>
        <ToastContainer position="top-right" autoClose={3000} />
 
-    
+    <div className="query">
+        For any Query  9559983740 (Arpit Pandey)  6387120082 (Mohd Ziya)
+      </div>
     </div>
     </Router>
   );
