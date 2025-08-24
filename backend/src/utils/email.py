@@ -8,13 +8,10 @@ from email.mime.multipart import MIMEMultipart
 import os
 from dotenv import load_dotenv
 from typing import Dict, Optional
-from ..database.operations import StudentDatabase, OTPDatabase
+from ..database.operations import StudentDatabase
+from .memory_storage import memory_storage
 
 load_dotenv()
-
-# In-memory storage for demo purposes (replace with database in production)
-students_db = {}
-otp_storage = {}
 
 
 class EmailService:
@@ -24,6 +21,58 @@ class EmailService:
         self.smtp_username = os.getenv("SMTP_USERNAME", "")
         self.smtp_password = os.getenv("SMTP_PASSWORD", "")
         self.from_email = os.getenv("FROM_EMAIL", self.smtp_username)
+
+    async def send_confirmation_email(self, to_email: str):
+        """Send confirmation email after successful registration"""
+        try:
+            enable_email = os.getenv("ENABLE_EMAIL_SENDING", "false").lower() == "true"
+            if not enable_email or not self.smtp_username or not self.smtp_password:
+                print(f"📧 EMAIL DEMO MODE - Confirmation for {to_email}")
+                print("💡 To enable real emails, configure SMTP settings in .env file")
+                return True
+
+            message = MIMEMultipart()
+            message["From"] = self.from_email
+            message["To"] = to_email
+            message["Subject"] = "✅ Registration Confirmed - Trained & Tuned'25"
+
+            body = f"""
+            <html>
+            <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; color: white;'>
+                    <h1 style='margin: 0; font-size: 28px;'>🎓 Trained & Tuned'25</h1>
+                    <p style='margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;'>Student Registration Portal</p>
+                </div>
+                <div style='background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 20px 0;'>
+                    <h2 style='color: #333; margin-top: 0;'>Registration Confirmed!</h2>
+                    <p style='color: #555; font-size: 16px; line-height: 1.6;'>
+                        Congratulations! Your email has been successfully verified and your registration for Trained & Tuned'25 is now complete.<br><br>
+                        We look forward to seeing you at the event!
+                    </p>
+                </div>
+                <div style='text-align: center; padding: 20px; color: #666; font-size: 12px;'>
+                    <p style='margin: 0;'>© 2025 Trained & Tuned'25 Event | Student Registration System</p>
+                    <p style='margin: 5px 0 0 0;'>This is an automated message, please do not reply.</p>
+                </div>
+            </body>
+            </html>
+            """
+            message.attach(MIMEText(body, "html"))
+            print(f"📤 Attempting to send confirmation email to {to_email}...")
+            await aiosmtplib.send(
+                message,
+                hostname=self.smtp_server,
+                port=self.smtp_port,
+                start_tls=True,
+                username=self.smtp_username,
+                password=self.smtp_password,
+            )
+            print(f"✅ Confirmation email sent successfully to {to_email}")
+            return True
+        except Exception as e:
+            print(f"❌ Failed to send confirmation email to {to_email}: {str(e)}")
+            print(f"📧 FALLBACK - Confirmation for {to_email}")
+            return True
 
     async def send_otp_email(self, to_email: str, otp: str):
         """Send OTP via email"""
@@ -70,12 +119,6 @@ class EmailService:
                         <div style="font-size: 32px; font-weight: bold; color: #333; letter-spacing: 8px; font-family: monospace;">
                             {otp}
                         </div>
-                    </div>
-                    
-                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                        <p style="margin: 0; color: #856404; font-size: 14px;">
-                            ⏰ <strong>Important:</strong> This code will expire in 10 minutes for security reasons.
-                        </p>
                     </div>
                     
                     <p style="color: #555; font-size: 14px; line-height: 1.6;">
@@ -130,31 +173,41 @@ def generate_otp() -> str:
     return "".join(otp_chars)
 
 
+async def store_pending_registration(email: str, student_data: dict):
+    """Store pending registration in memory"""
+    memory_storage.store_pending_registration(email, student_data)
+
+
+async def get_pending_registration(email: str) -> Optional[Dict]:
+    """Get pending registration from memory"""
+    return memory_storage.get_pending_registration(email)
+
+
 async def store_otp(email: str, otp: str):
-    """Store OTP for verification (MongoDB)"""
-    return await OTPDatabase.store_otp(email, otp)
+    """Store OTP for verification (Memory)"""
+    memory_storage.store_otp(email, otp)
 
 
 async def verify_otp(email: str, otp: str) -> bool:
-    """Verify OTP (MongoDB)"""
-    return await OTPDatabase.verify_otp(email, otp)
+    """Verify OTP (Memory)"""
+    return memory_storage.verify_otp(email, otp)
 
 
-async def store_student(student_data: dict) -> str:
-    """Store student data (MongoDB)"""
-    return await StudentDatabase.create_student(student_data)
+async def create_verified_student(student_data: dict) -> str:
+    """Store verified student data in database"""
+    return await StudentDatabase.create_verified_student(student_data)
 
 
-async def get_student_by_email(email: str) -> Optional[Dict]:
-    """Get student by email (MongoDB)"""
-    return await StudentDatabase.get_student_by_email(email)
-
-
-async def update_student_verification(email: str):
-    """Mark student as verified (MongoDB)"""
-    return await StudentDatabase.update_student_verification(email)
+async def get_verified_student_by_email(email: str) -> Optional[Dict]:
+    """Get verified student by email from database"""
+    return await StudentDatabase.get_verified_student_by_email(email)
 
 
 async def delete_student_by_email(email: str) -> bool:
-    """Delete student by email (MongoDB)"""
+    """Delete student by email from database"""
     return await StudentDatabase.delete_student_by_email(email)
+
+
+async def get_memory_stats() -> Dict[str, int]:
+    """Get memory storage statistics"""
+    return memory_storage.get_stats()

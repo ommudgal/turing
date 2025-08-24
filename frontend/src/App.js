@@ -3,6 +3,7 @@ import './App.css';
 import Input from './components/Input';
 import { BrowserRouter as Router,Route,Routes } from 'react-router';
 import Verification from './components/Verification';
+import Success from './components/Success';
 import { ToastContainer } from 'react-toastify';
 import { useState } from 'react';
 
@@ -41,11 +42,11 @@ function App() {
           <img src="./bottom-left-ball2.png" alt="" height="100%" width="100%" />
         </div>
       </div>
-      <h1>Trained & Tuned'25</h1>
+      <h1>The Turing Test 25</h1>
       <Routes>
       <Route path ="/" element={<Input  handleevent={handleevent}/>}/>
        <Route path ="/Verify" element={ <Verification useremail={useremail} />}/>
-     
+       <Route path ="/Success" element={ <Success useremail={useremail} />}/>
       </Routes>
        <ToastContainer position="top-right" autoClose={3000} />
 

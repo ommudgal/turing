@@ -257,6 +257,13 @@ margin-bottom:40px;
     margin-top: 0.25rem;
   }
   
+  .help-text {
+    color: #666;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+  
   .submitbtn{
     margin-top:10%;
     width: 90%;
@@ -477,3 +484,155 @@ margin-bottom:40px;
   font-size: 15px;
 }
   }
+
+/* Success Page Styles */
+.success-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  animation: fadeIn 0.6s ease-in;
+}
+
+.success-content {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.success-icon {
+  margin-bottom: 20px;
+  animation: bounceIn 0.8s ease-out;
+}
+
+.success-title {
+  color: #4CAF50;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  font-family: 'League Spartan', sans-serif;
+}
+
+.success-message {
+  margin-bottom: 30px;
+}
+
+.success-message p {
+  color: #333;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  font-family: 'League Spartan', sans-serif;
+}
+
+.success-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 10px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  font-size: 14px;
+  font-family: 'League Spartan', sans-serif;
+}
+
+.detail-icon {
+  font-size: 18px;
+}
+
+.success-actions {
+  margin-bottom: 20px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'League Spartan', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #45a049, #4CAF50);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.success-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 20px;
+}
+
+.success-footer p {
+  color: #666;
+  font-size: 14px;
+  margin: 5px 0;
+  font-family: 'League Spartan', sans-serif;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .success-content {
+    padding: 20px;
+    margin: 10px;
+  }
+  
+  .success-title {
+    font-size: 24px;
+  }
+  
+  .success-details {
+    padding: 15px;
+  }
+  
+  .detail-item {
+    font-size: 13px;
+  }
+}

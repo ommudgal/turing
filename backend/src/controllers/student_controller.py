@@ -11,9 +11,11 @@ from ..utils.email import (
     generate_otp,
     store_otp,
     verify_otp,
-    store_student,
-    get_student_by_email,
-    update_student_verification,
+    store_pending_registration,
+    get_pending_registration,
+    create_verified_student,
+    get_verified_student_by_email,
+    get_memory_stats,
 )
 from ..utils.captcha import verify_recaptcha
 
@@ -22,52 +24,39 @@ email_service = EmailService()
 
 class StudentController:
     @staticmethod
-    async def register_student(student_data: StudentRegistration):
-        """Register a new student"""
+    async def register_student(student_data: StudentRegistration, request=None):
+        """Register a new student (stores in memory until verified)"""
         try:
             print(f"🔍 Registration Debug:")
             print(f"   Received data: {student_data.dict()}")
 
-            # Check if student already exists
-            existing_student = await get_student_by_email(student_data.studentEmail)
-            if existing_student:
-                print(f"❌ Student already exists: {student_data.studentEmail}")
-                print(f"   Existing student data: {existing_student}")
+            # Check if student is already verified in database
+            existing_verified_student = await get_verified_student_by_email(
+                student_data.studentEmail
+            )
+            if existing_verified_student:
+                print(
+                    f"❌ Student already verified and registered: {student_data.studentEmail}"
+                )
+                raise HTTPException(
+                    status_code=400,
+                    detail="Student is already registered and verified. Please contact support if you need assistance.",
+                )
 
-                # Check if student is already verified
-                if existing_student.get("isVerified", False):
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Student is already registered and verified. Please contact support if you need assistance.",
-                    )
-                else:
-                    # Student exists but not verified, resend OTP
-                    print(f"🔄 Resending OTP to existing unverified student...")
-                    otp = generate_otp()
-                    await store_otp(student_data.studentEmail, otp)
-
-                    email_sent = await email_service.send_otp_email(
-                        student_data.studentEmail, otp
-                    )
-
-                    if email_sent:
-                        return {
-                            "message": "Student already registered but not verified. New verification code sent to your email.",
-                            "student_id": existing_student["id"],
-                            "success": True,
-                        }
-                    else:
-                        raise HTTPException(
-                            status_code=500, detail="Failed to send verification email"
-                        )
-
-            print(f"✅ New student registration proceeding...")
-
-            # Store student data
-            student_dict = student_data.dict()
-            student_id = await store_student(student_dict)
-
-            print(f"📝 Student stored with ID: {student_id}")
+            # Check if there's a pending registration
+            pending_registration = await get_pending_registration(
+                student_data.studentEmail
+            )
+            if pending_registration:
+                print(f"🔄 Resending OTP to pending registration...")
+            else:
+                print(f"✅ New student registration proceeding...")
+                # Store pending registration in memory
+                student_dict = student_data.dict()
+                await store_pending_registration(
+                    student_data.studentEmail, student_dict
+                )
+                print(f"📝 Pending registration stored in memory")
 
             # Generate and send OTP
             otp = generate_otp()
@@ -86,10 +75,13 @@ class StudentController:
                     status_code=500, detail="Failed to send verification email"
                 )
 
+            # Get memory statistics for logging
+            stats = await get_memory_stats()
+            print(f"📊 Memory stats: {stats}")
+
             print(f"✅ Registration successful!")
             return {
-                "message": "Student registered successfully. Please check your email for verification code.",
-                "student_id": student_id,
+                "message": "Registration initiated. Please check your email for verification code.",
                 "success": True,
             }
 
@@ -104,16 +96,33 @@ class StudentController:
 
     @staticmethod
     async def verify_otp(verification_data: OTPVerification):
-        """Verify OTP for student"""
+        """Verify OTP and create verified student in database"""
         try:
-            # Verify OTP
+            # Verify OTP from memory
             is_valid = await verify_otp(verification_data.email, verification_data.otp)
 
             if not is_valid:
                 raise HTTPException(status_code=400, detail="Invalid or expired OTP")
 
-            # Update student verification status
-            await update_student_verification(verification_data.email)
+            # Get pending registration data from memory
+            pending_data = await get_pending_registration(verification_data.email)
+            if not pending_data:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Registration data not found. Please register again.",
+                )
+
+            # Create verified student in database
+            student_id = await create_verified_student(pending_data)
+            print(f"✅ Verified student created in database with ID: {student_id}")
+
+            # Clean up memory storage
+            from ..utils.memory_storage import memory_storage
+
+            memory_storage.remove_pending_registration(verification_data.email)
+
+            # Send confirmation email
+            await email_service.send_confirmation_email(verification_data.email)
 
             return OTPResponse(
                 message="Email verified successfully! Registration completed.",
@@ -131,10 +140,21 @@ class StudentController:
     async def resend_otp(email: str):
         """Resend OTP to student"""
         try:
-            # Check if student exists
-            student = await get_student_by_email(email)
-            if not student:
-                raise HTTPException(status_code=404, detail="Student not found")
+            # Check if student is already verified
+            verified_student = await get_verified_student_by_email(email)
+            if verified_student:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Student is already verified. No need to resend OTP.",
+                )
+
+            # Check if there's a pending registration
+            pending_data = await get_pending_registration(email)
+            if not pending_data:
+                raise HTTPException(
+                    status_code=404,
+                    detail="No pending registration found. Please register first.",
+                )
 
             # Generate new OTP
             otp = generate_otp()
@@ -173,4 +193,19 @@ class StudentController:
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail=f"reCAPTCHA validation failed: {str(e)}"
+            )
+
+    @staticmethod
+    async def get_system_stats():
+        """Get system statistics for monitoring"""
+        try:
+            memory_stats = await get_memory_stats()
+            return {
+                "memory_storage": memory_stats,
+                "message": "System statistics retrieved successfully",
+                "success": True,
+            }
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Failed to get system stats: {str(e)}"
             )

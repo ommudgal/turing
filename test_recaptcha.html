@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>reCAPTCHA Test</title>
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfGaa8rAAAAAC7YlsrcYzwAYPZKO0nny7TFQn65"></script>
+  </head>
+  <body>
+    <h1>reCAPTCHA Enterprise Test</h1>
+    <p>Site Key: 6LfGaa8rAAAAAC7YlsrcYzwAYPZKO0nny7TFQn65</p>
+    <button onclick="testRecaptcha()">Test reCAPTCHA</button>
+
+    <div id="result"></div>
+
+    <script>
+      function testRecaptcha() {
+        console.log("Testing reCAPTCHA Enterprise...");
+        document.getElementById("result").innerHTML =
+          "reCAPTCHA Enterprise script loaded successfully!";
+
+        // Test if grecaptcha is available
+        if (typeof grecaptcha !== "undefined") {
+          document.getElementById("result").innerHTML +=
+            "<br>✅ grecaptcha object is available";
+
+          // Test ready function
+          grecaptcha.enterprise.ready(function () {
+            document.getElementById("result").innerHTML +=
+              "<br>✅ reCAPTCHA Enterprise ready";
+
+            grecaptcha.enterprise
+              .execute("6LfGaa8rAAAAAC7YlsrcYzwAYPZKO0nny7TFQn65", {
+                action: "test",
+              })
+              .then(function (token) {
+                document.getElementById("result").innerHTML +=
+                  "<br>✅ Token generated: " + token.substring(0, 20) + "...";
+              })
+              .catch(function (error) {
+                document.getElementById("result").innerHTML +=
+                  "<br>❌ Error: " + error;
+              });
+          });
+        } else {
+          document.getElementById("result").innerHTML +=
+            "<br>❌ grecaptcha object not available";
+        }
+      }
+    </script>
+  </body>
+</html>

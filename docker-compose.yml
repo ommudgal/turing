@@ -23,10 +23,34 @@ services:
     depends_on:
       - backend
     environment:
-      - REACT_APP_API_URL=http://localhost:5054/api/v1
+      - REACT_APP_API_URL=https://mlcoe.live/api/v1
+      
     # The frontend can reach the backend via 'backend' hostname on the Docker network
     # No SMTP needed for frontend
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    depends_on:
+      - frontend
+      - backend
 networks:
   default:
     driver: bridge
     # All services share this network, so they can communicate using service names as hostnames
+
+volumes:
+  redis_data:

@@ -5,27 +5,34 @@ from dotenv import load_dotenv
 load_dotenv()
 
 RECAPTCHA_SECRET_KEY = os.getenv(
-    "RECAPTCHA_SECRET_KEY", "6LfZSKgrAAAAAFyGHqGCmVNWaKKafn_0QZ1qN9aB"
+    "RECAPTCHA_SECRET_KEY", "6LfGaa8rAAAAADTNAJk9l5AfHf4gg0FXEJZ_b31k"
 )
 
 
 async def verify_recaptcha(recaptcha_response: str) -> bool:
     """Verify reCAPTCHA response"""
     try:
-        # For demo purposes, always return True
-        # In production, uncomment the actual verification code below
-        print(f"reCAPTCHA token received: {recaptcha_response}")
-        return True
+        print(f"🤖 reCAPTCHA token received: {recaptcha_response}")
 
-        # Actual reCAPTCHA verification (uncomment for production)
-        # url = "https://www.google.com/recaptcha/api/siteverify"
-        # data = {
-        #     'secret': RECAPTCHA_SECRET_KEY,
-        #     'response': recaptcha_response
-        # }
-        # response = requests.post(url, data=data)
-        # result = response.json()
-        # return result.get('success', False)
+        # reCAPTCHA verification (works with both standard and Enterprise)
+        url = "https://www.google.com/recaptcha/api/siteverify"
+        data = {"secret": RECAPTCHA_SECRET_KEY, "response": recaptcha_response}
+
+        response = requests.post(url, data=data, timeout=10)
+        result = response.json()
+
+        success = result.get("success", False)
+        score = result.get("score", 0)  # For v3
+
+        print(f"🔍 reCAPTCHA verification result:")
+        print(f"   Success: {success}")
+        print(f"   Score: {score}")
+        print(f"   Full response: {result}")
+
+        # For v2 invisible, just check success
+        # For v3, you might want to check score > 0.5
+        return success
+
     except Exception as e:
-        print(f"reCAPTCHA verification error: {str(e)}")
+        print(f"❌ reCAPTCHA verification error: {str(e)}")
         return False

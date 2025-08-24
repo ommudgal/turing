@@ -1,34 +1,62 @@
 
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5054/api/v1';
+const API_URL = process.env.REACT_APP_API_URL || 'http://mlcoe.live/api/v1';
 
 const Verification = ({useremail}) => {
   const [otp, setOtp] = useState(Array(5).fill("")); // Changed from 4 to 5 for new format
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastResendTime, setLastResendTime] = useState(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const navigate = useNavigate();
+
+  const COOLDOWN_DURATION = 60; // 1 minute in seconds
+
+  // Update cooldown timer every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - lastResendTime) / 1000);
+      const remaining = Math.max(0, COOLDOWN_DURATION - elapsed);
+      setCooldownRemaining(remaining);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastResendTime]);
+
+  const canResend = cooldownRemaining === 0;
 
   const handleChange = (value, index) => {
+    console.log(`OTP input changed: index=${index}, value='${value}'`);
     if (/^[A-Za-z0-9]?$/.test(value)) { 
         const newOtp = [...otp];
         newOtp[index] = value.toUpperCase(); // Force uppercase for consistency
         setOtp(newOtp);
+        console.log(`Updated OTP array:`, newOtp);
 
         // Auto-focus next input
         if (value && index < 4) { // Changed from 3 to 4 for 5-character OTP
-          document.getElementById(`otp-input-${index + 1}`).focus();
+          const nextInput = document.getElementById(`otp-input-${index + 1}`);
+          if (nextInput) {
+            nextInput.focus();
+          }
         }
     }
   };
 
   const handleSubmit = async () => {
+    console.log(`Submit clicked: isSubmitting=${isSubmitting}, otp=`, otp);
+    
     if (isSubmitting) {
       return; // Prevent multiple submissions
     }
 
     const enteredOtp = otp.join("");
+    console.log(`Entered OTP: '${enteredOtp}', length: ${enteredOtp.length}`);
     
     if (enteredOtp.length !== 5) {
       toast.error("Please enter the complete 5-character verification code.");
@@ -52,8 +80,10 @@ const Verification = ({useremail}) => {
       if (response.data.success) {
         toast.success("🎉 Email verified successfully! Registration completed.");
         setOtp(new Array(5).fill("")); // Clear 5-character OTP
-        // You might want to redirect to a success page here
-        // navigate("/success");
+        // Navigate to success page
+        setTimeout(() => {
+          navigate("/Success");
+        }, 2000); // Delay to show the success toast
       }
     } catch (error) {
       console.error("Error Response:", error.response?.data || error.message);
@@ -70,11 +100,17 @@ const Verification = ({useremail}) => {
     
 
   const handleResend = async() => {
+    if (!canResend) {
+      toast.warning(`Please wait ${cooldownRemaining} seconds before resending.`);
+      return;
+    }
+
     try {
       const response = await axios.get(`${API_URL}/student/resend-otp?email=${useremail}`, {withCredentials:true});
       console.log("Resend response:", response);
       
       if (response.data.success) {
+        setLastResendTime(Date.now()); // Set cooldown start time
         toast.success("New verification code sent to your email!", {
           position: "top-right",
           autoClose: 3000,
@@ -122,8 +158,16 @@ const Verification = ({useremail}) => {
           {isSubmitting ? "Verifying..." : "Submit"}
         </button>
      
-      <div className="resend" onClick={handleResend}>
-        Resend OTP
+      <div 
+        className={`resend ${!canResend ? 'disabled' : ''}`}
+        onClick={handleResend}
+        style={{
+          opacity: canResend ? 1 : 0.5,
+          cursor: canResend ? 'pointer' : 'not-allowed',
+          pointerEvents: canResend ? 'auto' : 'none'
+        }}
+      >
+        {canResend ? 'Resend OTP' : `Resend OTP (${cooldownRemaining}s)`}
       </div>
     </div>
   );

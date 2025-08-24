@@ -1,11 +1,11 @@
 
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5054/api/v1';
+const API_URL = process.env.REACT_APP_API_URL || 'http://mlcoe.live/api/v1';
 
 const Input = ({handleevent}) => {
   const [errors, setErrors] = useState({});
@@ -19,75 +19,92 @@ const Input = ({handleevent}) => {
   const [studentNumber, setStudentNumber] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
-  const [captchaSize, setCaptchaSize] = useState('normal');
   const [domain, setDomain] = useState("");
-  const [captchaToken, setCaptchaToken] = useState('');
-  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState('');
+  const recaptchaRef = useRef();
     
-const handleCaptcha = async(token) => {
-    console.log("Captcha token:", token);
-    setCaptchaToken(token);
-    
-    if (!token) {
-      setCaptchaVerified(false);
+// Invisible reCAPTCHA enabled
+  const regexPatterns = {
+    name: /^[A-Za-z\s]{3,30}$/,
+    branch: /^[A-Za-z\s()]+$/,
+    mobile: /^[0-9]{10}$/,
+    studentNumber: /^24[0-9]{5,18}$/,
+    email: /^[a-zA-Z0-9._%+-]+@akgec\.ac\.in$/,
+  };
+
+  const validateField = (field, value) => {
+    const pattern = regexPatterns[field];
+
+    // Early validation for student number - show error immediately if not starting with 24
+    if (field === "studentNumber") {
+      if (value.length >= 1 && !value.startsWith("2")) {
+        setErrors((prev) => ({ ...prev, studentNumber: "Student number must start with 24" }));
+        return;
+      }
+      if (value.length >= 2 && !value.startsWith("24")) {
+        setErrors((prev) => ({ ...prev, studentNumber: "Student number must start with 24" }));
+        return;
+      }
+      if (value.length >= 7 && value.length <= 20 && value.startsWith("24")) {
+        // Valid format so far, clear error
+        setErrors((prev) => {
+          const { studentNumber: _, ...rest } = prev;
+          return rest;
+        });
+      } else if (value.length > 20) {
+        setErrors((prev) => ({ ...prev, studentNumber: "Student number cannot exceed 20 characters" }));
+        return;
+      } else if (value.length > 0 && value.length < 7 && value.startsWith("24")) {
+        setErrors((prev) => ({ ...prev, studentNumber: "Student number must be at least 7 characters" }));
+        return;
+      }
+    }
+
+    // Basic pattern validation for complete input
+    if (pattern && value.length > 0 && !pattern.test(value)) {
+      if (field === "studentNumber") {
+        setErrors((prev) => ({ ...prev, [field]: "Student number must start with 24" }));
+      } else if (field === "email") {
+        setErrors((prev) => ({ ...prev, [field]: "Email must belong to akgec.ac.in domain" }));
+      } else {
+        setErrors((prev) => ({ ...prev, [field]: `Invalid ${field}` }));
+      }
       return;
     }
-    
-    try {
-      const res = await axios.post(`${API_URL}/student/validate`, {recaptchaValue:token},{withCredentials:true});
-      console.log("Captcha verified:", res);
-      setCaptchaVerified(true);
-      toast.success("Captcha verified successfully!");
-    } catch (err) {
-      console.error("Captcha verification failed:", err.response?.data || err.message);
-      setCaptchaVerified(false);
-      toast.error("Captcha verification failed. Please try again.");
+
+    // Additional validation for email - must contain student number
+    if (field === "email" && studentNumber && value.length > 0) {
+      if (!value.endsWith("@akgec.ac.in") && value.includes("@")) {
+        setErrors((prev) => ({ ...prev, email: "Email must belong to akgec.ac.in domain" }));
+        return;
+      }
+      if (value.endsWith("@akgec.ac.in") && !value.includes(studentNumber)) {
+        setErrors((prev) => ({ ...prev, email: `Email must contain student number ${studentNumber}` }));
+        return;
+      }
     }
-  };
-  const regexPatterns = {
-    name: /^[A-Za-z\s]{3,30}$/, 
-    branch: /^[A-Za-z\s]+$/,
-    email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    mobile: /^[0-9]{10}$/, 
-    studentNumber: /^[0-9]{5,7}$/,
-  };
 
- const validateField = (field, value) => {
-  const pattern = regexPatterns[field];
-  if (pattern && !pattern.test(value)) {
-    setErrors((prev) => ({ ...prev, [field]: `Invalid ${field}` }));
-    return;
-  }
+    // Cross-field validation when student number changes
+    if (field === "studentNumber" && email) {
+      if (!email.includes(value)) {
+        setErrors((prev) => ({ ...prev, email: `Email must contain student number ${value}` }));
+      } else {
+        // Clear email error if it now matches
+        setErrors((prev) => {
+          const { email: _, ...rest } = prev;
+          return rest;
+        });
+      }
+    }
 
-
-  if (field === "studentNumber" && !(value.startsWith("23") || value.startsWith("24"))) {
-    setErrors((prev) => ({ ...prev, studentNumber: "Student number must start with 23 or 24" }));
-    return;
-  }
-
- 
-  setErrors((prev) => {
-    const { [field]: _, ...rest } = prev;
-    return rest;
-  });
-
-  
-  if ((field === "email" || field === "studentNumber") && email && studentNumber) {
-    const emailMatch = email.match(/\d+/g); 
-    const numberInEmail = emailMatch ? emailMatch.join('') : '';
-    if (!email.includes(studentNumber) || !numberInEmail.includes(studentNumber)) {
-      setErrors((prev) => ({
-        ...prev,
-        email: "Student number does not match with email ID",
-      }));
-    } else {
+    // Clear current field error if validation passes
+    if (value.length === 0 || (pattern && pattern.test(value))) {
       setErrors((prev) => {
-        const { email: _, ...rest } = prev;
+        const { [field]: _, ...rest } = prev;
         return rest;
       });
     }
-  }
-};
+  };
 
 
   const handleClick = async(e) => {
@@ -118,9 +135,36 @@ const handleCaptcha = async(token) => {
       return;
     }
 
-    // Check captcha verification
-    if (!captchaVerified) {
-      toast.error("Please complete the captcha verification.");
+    // Execute invisible reCAPTCHA
+    if (recaptchaRef.current) {
+      try {
+        const token = await recaptchaRef.current.executeAsync();
+        if (!token) {
+          toast.error("reCAPTCHA verification failed. Please try again.");
+          return;
+        }
+        setRecaptchaToken(token);
+        
+        // Validate reCAPTCHA with backend
+        const captchaResponse = await axios.post(`${API_URL}/student/validate`, {
+          recaptchaValue: token
+        });
+        
+        if (!captchaResponse.data.success) {
+          toast.error("Security verification failed. Please try again.");
+          recaptchaRef.current.reset();
+          return;
+        }
+      } catch (captchaError) {
+        console.error("reCAPTCHA error:", captchaError);
+        toast.error("Security verification failed. Please try again.");
+        if (recaptchaRef.current) {
+          recaptchaRef.current.reset();
+        }
+        return;
+      }
+    } else {
+      toast.error("Security verification not loaded. Please refresh and try again.");
       return;
     }
 
@@ -164,8 +208,11 @@ const handleCaptcha = async(token) => {
         setEmail('');
         setMobile('');
         setDomain('');
-        setCaptchaToken('');
-        setCaptchaVerified(false);
+        setRecaptchaToken('');
+        // Reset reCAPTCHA for next use
+        if (recaptchaRef.current) {
+          recaptchaRef.current.reset();
+        }
       }
     } catch (error) {
       console.error("Registration error:", error.response?.data || error.message);
@@ -179,6 +226,10 @@ const handleCaptcha = async(token) => {
       }
     } finally {
       setIsSubmitting(false);
+      // Reset reCAPTCHA on error
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+      }
     }
   };
 
@@ -299,7 +350,10 @@ const handleCaptcha = async(token) => {
             type="tel"
             name="studentNumber"
             value={studentNumber}
-            onChange={(e) => setStudentNumber(e.target.value)}
+            onChange={(e) => {
+              setStudentNumber(e.target.value);
+              validateField("studentNumber", e.target.value);
+            }}
             onBlur={(e) => validateField("studentNumber", e.target.value)}
             required
           />
@@ -314,7 +368,10 @@ const handleCaptcha = async(token) => {
             type="email"
             name="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              validateField("email", e.target.value);
+            }}
             onBlur={(e) => validateField("email", e.target.value)}
             required
           />
@@ -333,26 +390,26 @@ const handleCaptcha = async(token) => {
           />
           {errors.mobile && <small className="error">{errors.mobile}</small>}
         </div>
-        <div className="handleCaptcha">
-<ReCAPTCHA
-        sitekey="6LfZSKgrAAAAAC4TqAYwouSIUC1ACsattTPVy22f"
-        onChange={handleCaptcha}
-        size={captchaSize}
-      />
-      </div>
+
+        {/* Invisible reCAPTCHA */}
+        <ReCAPTCHA
+          ref={recaptchaRef}
+          size="invisible"
+          sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY || "6LfGaa8rAAAAAC7YlsrcYzwAYPZKO0nny7TFQn65"}
+          onChange={(token) => setRecaptchaToken(token)}
+        />
        
         <button
           onClick={handleClick}
           type="submit"
           className="verifybtn input"
-          disabled={isSubmitting || !captchaVerified}
+          disabled={isSubmitting}
         >
           {isSubmitting ? "Submitting..." : "Verify"}
         </button>
       </form>
     </div>
   );
-};
-
+}
 
 export default Input;

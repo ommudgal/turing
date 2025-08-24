@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
 COPY . .
+RUN chmod -R +x /app
 RUN npm run build
 
 FROM nginx:alpine
