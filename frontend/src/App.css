@@ -85,6 +85,14 @@
     z-index: 1;
     width: 153px;
 }
+.query{
+margin-top: 2%;
+text-align: center;
+ background: linear-gradient(#FFFFFF, #777676); 
+  -webkit-background-clip: text;
+
+-webkit-text-fill-color: transparent;
+}
 h1{
 font-family: "League Spartan", sans-serif;
 font-weight: 600;
