@@ -170,6 +170,18 @@ const Verification = ({useremail}) => {
             onChange={(e) => handleChange(e.target.value, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
             onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => {
+              if (e.key === "Backspace") {
+                if (otp[index]) {
+                  const newOtp = [...otp];
+                  newOtp[index] = "";
+                  setOtp(newOtp);
+                } else if (index > 0) {
+                  const prevInput = document.getElementById(`otp-input-${index - 1}`);
+                  if (prevInput) prevInput.focus();
+                }
+              }}}
+            
           />
         ))}
       </div>
