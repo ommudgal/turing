@@ -636,3 +636,21 @@ margin-bottom:40px;
     font-size: 13px;
   }
 }
+
+/* Hide reCAPTCHA badge */
+.grecaptcha-badge {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Alternative method to hide reCAPTCHA */
+iframe[src*="recaptcha"] {
+  display: none !important;
+}
+
+/* Hide reCAPTCHA in bottom right corner */
+div[style*="position: fixed; bottom: 14px; right: 14px;"] {
+  display: none !important;
+}

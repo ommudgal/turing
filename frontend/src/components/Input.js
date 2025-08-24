@@ -398,6 +398,35 @@ const Input = ({handleevent}) => {
           sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY || "6LfGaa8rAAAAAC7YlsrcYzwAYPZKO0nny7TFQn65"}
           onChange={(token) => setRecaptchaToken(token)}
         />
+        
+        {/* reCAPTCHA Privacy Notice */}
+        <div style={{
+          fontSize: '12px',
+          color: '#999',
+          textAlign: 'center',
+          margin: '10px 0',
+          lineHeight: '1.4'
+        }}>
+          This site is protected by reCAPTCHA and the Google{' '}
+          <a 
+            href="https://policies.google.com/privacy" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ color: '#9E4084', textDecoration: 'underline' }}
+          >
+            Privacy Policy
+          </a>
+          {' '}and{' '}
+          <a 
+            href="https://policies.google.com/terms" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ color: '#9E4084', textDecoration: 'underline' }}
+          >
+            Terms of Service
+          </a>
+          {' '}apply.
+        </div>
        
         <button
           onClick={handleClick}
